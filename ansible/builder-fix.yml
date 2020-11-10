@@ -1,0 +1,73 @@
+---
+   - name: "Docker image builder"
+     hosts: test-server
+     vars: 
+        hub: "aldifarzum"
+        proj: "frontend"
+        proj3: "backend"
+        dests: /home/ansman/project
+        repo: https://github.com/Rivaldi-Idris-Junior-IT/pos_frontend_vue_docker.git
+        repo2: https://github.com/Rivaldi-Idris-Junior-IT/pos_backend_express_docker.git
+        proj1: "dockerpos-frontend"
+        proj2: "dockerpos-backend"
+     
+     tasks:
+
+       - name: "Check connection to node"
+         ping: 
+
+       - name: "Ensure git installed"
+         yum: 
+           name: git
+           state: present
+         
+       - name: "Installing Python Docker"
+         become: true
+         pip:
+           name: docker
+         
+       - name: "Use Git module to clone frontend"
+         git: 
+             repo: "{{repo}}"
+             dest: "{{dests}}/{{proj}}"
+             version: "master"
+             updated: yes
+       
+       - name: "Use Git module to clone backend"
+         git: 
+             repo: "{{repo2}}"
+             dest: "{{dests}}/{{proj3}}"          
+             version: "master"
+             updated: yes
+       
+       - name: Pull latest changes backend
+         command: git pull origin {{branch}}
+         args:
+          chdir: "{{dests}}/{{proj3}}"
+
+       - name: Pull latest changes backend
+         command: git pull origin {{branch}}
+         args:
+          chdir: "{{dests}}/{{proj}}"
+       
+       - name: "Remove current image frontend"
+         command : "docker rmi -f aldifarzum/dockerpos-frontend:v1.0.0.1"
+
+       - name: "Remove current image backend"
+         command : "docker rmi -f aldifarzum/dockerpos-backend:v1.0.0.2"
+
+       - name: "Build image frontend"
+         community.general.docker_image:
+           name: "{{hub}}/{{proj1}}:v1.0.0.1"
+           build:
+             path: "{{dests}}/{{proj}}"
+           push: yes
+           source: build               
+       
+       - name: "Build image backend"
+         community.general.docker_image:
+           name: "{{hub}}/{{proj2}}:v1.0.0.2"
+           build:
+             path: "{{dests}}/{{proj3}}"
+           push: yes
+           source: build             
