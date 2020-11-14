@@ -6,8 +6,8 @@
         proj: "frontend"
         proj3: "backend"
         dests: /home/ansman/project
-        repo: https://github.com/Rivaldi-Idris-Junior-IT/pos_frontend_vue_docker.git
-        repo2: https://github.com/Rivaldi-Idris-Junior-IT/pos_backend_express_docker.git
+        repo: https://github.com/Rivaldi-Idris-Junior-IT/pos-frontend-vue-docker-ansible.git
+        repo2: https://github.com/Rivaldi-Idris-Junior-IT/pos-backend-express-ansible.git
         proj1: "dockerpos-frontend"
         proj2: "dockerpos-backend"
      
@@ -20,33 +20,28 @@
          yum: 
            name: git
            state: present
-         
-       - name: "Installing Python Docker"
-         become: true
-         pip:
-           name: docker
-         
+                         
        - name: "Use Git module to clone frontend"
          git: 
              repo: "{{repo}}"
              dest: "{{dests}}/{{proj}}"
              version: "master"
-             updated: yes
+             update: yes
        
        - name: "Use Git module to clone backend"
          git: 
              repo: "{{repo2}}"
              dest: "{{dests}}/{{proj3}}"          
              version: "master"
-             updated: yes
+             update: yes
        
-       - name: Pull latest changes backend
-         command: git pull origin {{branch}}
+       - name: "Pull latest changes backend"
+         command: git pull origin master
          args:
           chdir: "{{dests}}/{{proj3}}"
 
-       - name: Pull latest changes backend
-         command: git pull origin {{branch}}
+       - name: "Pull latest changes frontend"
+         command: git pull origin master
          args:
           chdir: "{{dests}}/{{proj}}"
        
@@ -71,3 +66,9 @@
              path: "{{dests}}/{{proj3}}"
            push: yes
            source: build             
+
+       - name: "Installing Python Docker"
+         become: true
+         pip:
+           name: docker
+        
